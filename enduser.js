@@ -52,6 +52,7 @@ app.put('/updateUser/:id',(req,res)=>{
 
 
 
+
 app.post('/postUser',(req,res)=>{
   let createUsers=1;
   console.log(req.body);
