@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Contact Form</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <style>
+        .form-group label {
+            font-weight: bold;
+        }
+
+        th {
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+        }
+    </style>
+
+
+</head>
+
+<body onload="getAllUser()">
+    <div class="container">
+        <h1>Contact Us</h1>
+        <div class="row">
+            <div class="col-6">
+                <form>
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address:</label>
+                        <input type="email" class="form-control" id="email" name="email"
+                            placeholder="Enter your email address">
+                    </div>
+            </div>
+
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="message">Message:</label>
+                    <textarea class="form-control" id="message" rows="5" name="message"
+                        placeholder="Enter your message"></textarea>
+                </div>
+            </div>
+        </div>
+        <button type="button" id="form-btn" class="btn btn-primary">Create User</button>
+        </form>
+
+    </div>
+
+
+    <!--List Table-->
+
+    <table class="table">
+
+        <thead>
+
+                    <tr>
+
+                        <th>Name</th>
+
+                        <th>Email</th>
+
+                        <th>Message</th>
+                <th>Actions</th>
+                       
+            </tr>
+
+        </thead>
+
+            <tbody>     
+
+        </tbody>
+
+    </table>
+
+         
+
+    <!-- Bootstrap JS and jQuery -->
+    <script>
+
+
+        //EventListener Function
+        let uniqueUserID;
+        let btn = document.getElementById('form-btn');
+        btn.addEventListener("click",()=>{
+            btn.textContent == "Create User" ? createUser(): updateUser(uniqueUserID);
+        });
+
+
+
+
+        //Get AllUserData
+
+        function getAllUser() {
+            fetch('http://localhost:3000/getAllUser')
+                .then(res => res.json())
+                .then(json => {
+                    console.log(json, "json value")
+
+                    html = "";
+
+
+                    json.forEach(e => {
+                        html += `<tr>
+                            <td>
+    
+                   ${e.username}
+    
+                </td>
+    
+                <td>
+    
+                    ${e.email}
+    
+                    </td>
+    
+                    <td>
+    
+                        ${e.message}
+    
+                        </td>
+
+                      <td>
+                        <input class="btn btn-warning" type="button" value="Edit" onclick="editUser(${e.id})">
+                        <input class="btn btn-danger" type="button" value="Delete" onclick="deleteUser(${e.id})">
+                        </td>
+                            </tr>`
+                    });
+
+
+                    document.getElementsByTagName('tbody')[0].innerHTML = html;
+
+                })
+
+        }
+
+
+
+        //CreateUser
+
+        function createUser() {
+            console.log('create user /.........');
+            fetch('http://localhost:3000/postUser', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    message: document.getElementById('message').value,
+                }),
+
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                }
+            })
+                .then(response => response.json())
+                .then(json =>{
+                    console.log(json, "fghjkl    ");
+                    getAllUser();
+                    clearTextBox();
+            })
+        }
+
+
+
+        //Delete User
+
+        function deleteUser(deleteUserId) {
+            fetch('http://localhost:3000/deleteUserById', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    id: deleteUserId
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                }
+            })
+                .then(response => response.json())
+                .then(json => {
+
+                    console.log(json, "deleted");
+                    getAllUser();
+                })
+
+        }
+
+
+        function editUser(editUserId) {
+            uniqueUserID = editUserId;
+            fetch(`http://localhost:3000/getUserById/${editUserId}`, {
+
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('name').value=data[0].username;
+                document.getElementById('email').value=data[0].email;
+                document.getElementById('message').value=data[0].message;
+                btn.textContent = "Update"
+            })
+        }
+
+
+        function updateUser(userId){
+            console.log('userid/....................',userId);
+            console.log('update user /........');
+             fetch(`http://localhost:3000/updateUser/${userId}`,{
+                method:'PUT',
+                body: JSON.stringify({
+                  username: document.getElementById('name').value,
+                  email: document.getElementById('email').value,
+                  message: document.getElementById('message').value,
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                }
+             })
+             
+             .then(response=>response.json())
+             .then(json=>{
+                console.log(json);
+                getAllUser();
+                clearTextBox();
+             })
+
+            btn.textContent = "Create User"
+        }
+
+        function clearTextBox(){
+            console.log("clear text box")
+            document.getElementById('name').value='';
+            document.getElementById('email').value='';
+            document.getElementById('message').value='';
+        }
+
+    </script>
+</body>
+
+</html>
